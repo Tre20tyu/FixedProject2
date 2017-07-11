@@ -3,10 +3,15 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
-
+import java.util.ArrayList;
 public class Game extends JFrame implements KeyListener {
 
-    //window vars
+   
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	//window vars
     private final int MAX_FPS;
     private final int WIDTH;
     private final int HEIGHT;
@@ -31,6 +36,23 @@ public class Game extends JFrame implements KeyListener {
     //sprite2 variables
     private float x2 = 50.0f;
     private float v2 = 100.0f;
+
+    ArrayList<Integer> keys = new ArrayList<>();
+
+    private void handleKeys() {
+        for(int key : keys) {
+            switch(key) {
+                case KeyEvent.VK_UP:
+                    break;
+                case KeyEvent.VK_DOWN:
+                    break;
+            }
+        }
+    }
+
+    
+    //ground
+    private int ground;
 
 
     public Game(int width, int height, int fps){
@@ -64,13 +86,16 @@ public class Game extends JFrame implements KeyListener {
         //update current fps
         fps = (int)(1f/dt);
 
+        handleKeys();
+
         //update sprite
         x += v;
-        if( x < 50 || x > (WIDTH - 50)) v *= -1;
+        if( x < 0 || x > (WIDTH - 100)) v *= -1;
 
         x2 += v2 * dt;
-        if( x2 < 50 || x2 > (WIDTH - 50)) v2 *= -1.0f;
+        if( x2 < 0 || x2 > (WIDTH - 50)) v2 *= -1.0f;
     }
+ 
 
     private void draw(){
         //get canvas
@@ -79,6 +104,8 @@ public class Game extends JFrame implements KeyListener {
         //clear screen
         g.setColor(Color.blue);
         g.fillRect(0,0,WIDTH, HEIGHT);
+        g.setColor(Color.GRAY);
+        g.fillRect(0, 700, WIDTH, HEIGHT);
 
         //draw fps
         g.setColor(Color.GREEN);
@@ -90,10 +117,15 @@ public class Game extends JFrame implements KeyListener {
 
         g.setColor(Color.red);
         g.fillRect((int)x2, HEIGHT/2, 50, 50);
+        
+       
+        
 
         //release resources, show the buffer
         g.dispose();
         strategy.show();
+        addKeyListener(this);
+        setFocusable(true);
     }
 
 
@@ -114,7 +146,7 @@ public class Game extends JFrame implements KeyListener {
 
             //dynamic thread sleep, only sleep the time we need to cap the framerate
             rest = (1000/MAX_FPS) - (System.currentTimeMillis() - startFrame);
-            if(rest >0){
+            if(rest > 0){
                 try{ Thread.sleep(rest); }
                 catch (InterruptedException e){ e.printStackTrace(); }
             }
@@ -124,27 +156,28 @@ public class Game extends JFrame implements KeyListener {
 
 
     public static void main(String[] args){
-        Game game = new Game(400, 300, 60);
+        Game game = new Game(800, 800, 60);
         game.run();
     }
 
-	@Override
-	public void keyPressed(KeyEvent arg0) {
-		switch(KeyEvent.getKeyCode()) {
-		
-		}
-		
-	}
+
+    @Override
+    public void keyTyped(KeyEvent keyEvent) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent keyEvent) {
+    for(int i = keys.size() - 1; 1 >= 0; i--) {
+    	if(keys.get(i) == keyEvent.getKeyCode())
+    		keys.remove(i);
+    }
+    }
 
 	@Override
-	public void keyReleased(KeyEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void keyTyped(KeyEvent arg0) {
-		// TODO Auto-generated method stub
+	public void keyReleased(KeyEvent e) {
+		if(!keys.contains(e.getKeyCode()))
+		    keys.remove(e.getKeyCode());
 		
 	}
 
