@@ -31,23 +31,28 @@ public class Game extends JFrame implements KeyListener {
 	private long startFrame;
 	private int fps;
 
-	// sprite1 variables
-	private float x = 50;
-	private float y = 1;
-
-	// sprite2 variables
-	private float x2 = 56.0f;
-	private float y2 = 100.0f;
+	private boolean isMovingRight;
+	private boolean isMovingLeft;
+	private boolean jumping;
+	private boolean falling;
 
 	// ground
-	int px = 400;
-	int py = 400;
+
+	Vector g = new Vector(5, 5);
+	// slowing vectre
+	Vector s = new Vector(1, 1);
+	// speed vector
+	Vector v = new Vector(5, 5);
+	// positional vector
+	Vector p = new Vector(30, 30);
 
 	public Game(int width, int height, int fps) {
 		super("JFrame Demo");
 		this.MAX_FPS = fps;
 		this.WIDTH = width;
 		this.HEIGHT = height;
+
+		p = new Vector(WIDTH / 2, HEIGHT / 2);
 	}
 
 	void init() {
@@ -73,9 +78,39 @@ public class Game extends JFrame implements KeyListener {
 	private void update() {
 		// update current fps
 		fps = (int) (1f / dt);
-
 		// update sprite
+		if (isMovingLeft) {
+			p.ix -= v.ix;
+		}
+		if (isMovingRight) {
+			p.ix += v.ix;
+		} else {
+			if (p.ix > 0) {
+				p.ix -= s.ix;
+				if (p.ix < 0) {
+					p.ix = 0;
+				}
+			}
+			if (p.ix < 0) {
+				p.ix += s.ix;
+				if (p.ix > 0) {
+					p.ix = 0;
+				}
+			}
+			if (jumping && !falling) {
+				p.iy += v.iy;
+				if (p.iy >= v.iy) {
+					p.iy = v.iy;
+				}
+			if(falling) {
+				p.iy -= g.iy;
+				if(p.iy >= g.iy) {
+					p.iy = g.iy;
+				}
+			}
+			}
 
+		}
 	}
 
 	private void draw() {
@@ -92,15 +127,8 @@ public class Game extends JFrame implements KeyListener {
 		g.setColor(Color.GREEN);
 		g.drawString(Long.toString(fps), 10, 40);
 
-		// draw sprite
-		g.setColor(Color.white);
-		g.fillRect((int) x, HEIGHT / 2 - 25, 100, 100);
-
-		g.setColor(Color.red);
-		g.fillRect((int) x2, HEIGHT / 2, 50, 50);
-
 		g.setColor(Color.PINK);
-		g.fillOval(px, py, 50, 70);
+		g.fillOval(p.ix, p.iy, WIDTH / 7, HEIGHT / 7);
 
 		// release resources, show the buffer
 		g.dispose();
@@ -151,20 +179,19 @@ public class Game extends JFrame implements KeyListener {
 	public void keyPressed(KeyEvent keyEvent) {
 		switch (keyEvent.getKeyCode()) {
 		case KeyEvent.VK_RIGHT:
-			//p.setX(p.x + .01f);
-			px += 1;
+			isMovingRight = true;
+			// p.setX(p.x + .01f);
 			break;
 		case KeyEvent.VK_LEFT:
-			//p.setX(p.x - .01f);
-			px += 1;
+			isMovingLeft = true;
+			// p.setX(p.x - .01f);
 			break;
 		case KeyEvent.VK_UP:
-			//p.setY(p.y - .01f);
-			px += -1;
+			// p.setY(p.y - .01f);
+			jumping = true;
 			break;
 		case KeyEvent.VK_DOWN:
-			//p.setY(p.y + .01f);
-			px += -1;
+			// p.setY(p.y + .01f);
 			break;
 
 		}
@@ -172,6 +199,17 @@ public class Game extends JFrame implements KeyListener {
 
 	@Override
 	public void keyReleased(KeyEvent e) {
+		switch (e.getKeyCode()) {
+		case KeyEvent.VK_RIGHT:
+			isMovingRight = false;
+			break;
+		case KeyEvent.VK_LEFT:
+			isMovingLeft = false;
+			break;
+		case KeyEvent.VK_UP:
+			falling = true;
+			break;
+		}
 	}
 }
 /*
