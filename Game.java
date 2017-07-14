@@ -31,15 +31,21 @@ public class Game extends JFrame implements KeyListener {
 	private long startFrame;
 	private int fps;
 
-	private boolean isMovingRight;
-	private boolean isMovingLeft;
+	private double maxHeight = 600;
+
+	private boolean isMovingRight = false;
+	private boolean isMovingLeft = false;
 	private boolean jumping;
 	private boolean falling;
-
+	private boolean shoot;
+	private boolean bulletCheck;
+	
 	// ground
 
-	Vector g = new Vector(5, 5);
-	// slowing vectre
+	Vector b = new Vector(8,8);
+	// gravity vector
+	Vector gr = new Vector(5, 5);
+	// slowing vector
 	Vector s = new Vector(1, 1);
 	// speed vector
 	Vector v = new Vector(5, 5);
@@ -52,7 +58,7 @@ public class Game extends JFrame implements KeyListener {
 		this.WIDTH = width;
 		this.HEIGHT = height;
 
-		p = new Vector(WIDTH / 2, HEIGHT / 2);
+		p = new Vector(WIDTH / 2 - WIDTH / 10, 900);
 	}
 
 	void init() {
@@ -78,39 +84,49 @@ public class Game extends JFrame implements KeyListener {
 	private void update() {
 		// update current fps
 		fps = (int) (1f / dt);
+
 		// update sprite
 		if (isMovingLeft) {
 			p.ix -= v.ix;
 		}
 		if (isMovingRight) {
 			p.ix += v.ix;
-		} else {
-			if (p.ix > 0) {
-				p.ix -= s.ix;
-				if (p.ix < 0) {
-					p.ix = 0;
-				}
-			}
-			if (p.ix < 0) {
-				p.ix += s.ix;
-				if (p.ix > 0) {
-					p.ix = 0;
-				}
-			}
-			if (jumping && !falling) {
-				p.iy += v.iy;
-				if (p.iy >= v.iy) {
-					p.iy = v.iy;
-				}
-			if(falling) {
-				p.iy -= g.iy;
-				if(p.iy >= g.iy) {
-					p.iy = g.iy;
-				}
-			}
-			}
-
 		}
+		if (p.ix < 0) {
+			p.ix = 0;
+		}
+		if (p.ix < 0) {
+			p.ix += s.ix;
+			if (p.ix > 0) {
+				p.ix = 0;
+			}
+		}
+		if (jumping) {
+			falling = false;
+			p.iy += .01;
+			if (p.iy >= maxHeight) {
+				p.iy = (int) maxHeight;
+				jumping = false;
+				falling = true;
+				System.out.println(jumping);
+			}
+		}
+		if (p.iy >= maxHeight) {
+			falling = true;
+			System.err.println("I am now falling");
+			if (falling) {
+				jumping = false;
+				p.iy += v.iy;
+				if (p.iy >= 900) {
+					p.iy = 900;
+				}
+			}
+			}
+		
+		if(shoot) {
+			b.ix += v.ix*10;
+		}
+
 	}
 
 	private void draw() {
@@ -128,13 +144,19 @@ public class Game extends JFrame implements KeyListener {
 		g.drawString(Long.toString(fps), 10, 40);
 
 		g.setColor(Color.PINK);
-		g.fillOval(p.ix, p.iy, WIDTH / 7, HEIGHT / 7);
+		g.drawOval(p.ix, p.iy, WIDTH / 7, HEIGHT / 7);
+		if(shoot) {
+			g.setColor(Color.BLACK);
+			g.fillOval(b.ix, b.iy, WIDTH/ 7, HEIGHT/7);
+		}
 
 		// release resources, show the buffer
 		g.dispose();
 		strategy.show();
 		addKeyListener(this);
 		setFocusable(true);
+		
+		
 	}
 
 	public void run() {
@@ -180,20 +202,22 @@ public class Game extends JFrame implements KeyListener {
 		switch (keyEvent.getKeyCode()) {
 		case KeyEvent.VK_RIGHT:
 			isMovingRight = true;
-			// p.setX(p.x + .01f);
 			break;
 		case KeyEvent.VK_LEFT:
 			isMovingLeft = true;
-			// p.setX(p.x - .01f);
 			break;
 		case KeyEvent.VK_UP:
-			// p.setY(p.y - .01f);
 			jumping = true;
 			break;
 		case KeyEvent.VK_DOWN:
-			// p.setY(p.y + .01f);
 			break;
-
+		case KeyEvent.VK_SPACE:
+			bulletCheck = false;
+			shoot = true;
+		/*
+		 * default: isMovingRight = false; isMovingLeft = false; jumping = false;
+		 * falling = false;
+		 */
 		}
 	}
 
@@ -209,7 +233,9 @@ public class Game extends JFrame implements KeyListener {
 		case KeyEvent.VK_UP:
 			falling = true;
 			break;
-		}
+		case KeyEvent.VK_SPACE:
+			shoot = true;
+			}
 	}
 }
 /*
