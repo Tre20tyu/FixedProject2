@@ -31,34 +31,39 @@ public class Game extends JFrame implements KeyListener {
 	private long startFrame;
 	private int fps;
 
-	private double maxHeight = 600;
+	private double maxHeight = 500;
 
 	private boolean isMovingRight = false;
 	private boolean isMovingLeft = false;
 	private boolean jumping;
 	private boolean falling;
-	private boolean shoot;
+	private boolean inAir;
 	private boolean canShoot;
 
 	// ground
 
-	Vector b = new Vector(30, 30);
+	
 	// gravity vector
-	Vector gr = new Vector(5, 5);
-	// slowing vector
-	Vector s = new Vector(1, 1);
+	Vector gr = new Vector(2.5f, 12);
 	// speed vector
-	Vector v = new Vector(5, 5);
-	// positional vector
+	// Drag
+	Vector s = new Vector(1, 1);
+	// Speed
+	Vector v = new Vector(8, 15);
+	// positional vectors
+	// Player
+	Vector b = new Vector(30, 30);
 	Vector p = new Vector(30, 30);
+	
 
 	public Game(int width, int height, int fps) {
-		super("JFrame Demo");
+		super("Shooty Gun");
 		this.MAX_FPS = fps;
 		this.WIDTH = width;
 		this.HEIGHT = height;
 
 		p = new Vector(WIDTH / 2 - WIDTH / 10, 900);
+		b = new Vector(WIDTH / 2 - WIDTH / 10, 950);
 	}
 
 	void init() {
@@ -86,11 +91,41 @@ public class Game extends JFrame implements KeyListener {
 		fps = (int) (1f / dt);
 
 		// update sprite
+		if (p.iy > HEIGHT || p.iy <= maxHeight) {
+			inAir = true;
+		}
+		if (p.iy > HEIGHT && !falling) {
+			jumping = true;
+		} else if (inAir)
+			falling = true;
+		if (jumping) {
+			falling = false;
+			p.iy -= v.iy;
+			if (p.iy <= maxHeight) {
+				p.iy = (int) maxHeight;
+			}
+		}
+		if (p.iy <= maxHeight) {
+			falling = true;
+		}
+		if (falling) {
+			jumping = false;
+			p.iy += gr.iy;
+			if (p.iy >= 900) {
+				p.iy = 900;
+			}
+		}
 		if (isMovingLeft) {
 			p.ix -= v.ix;
+			if(inAir) {
+				p.ix += gr.ix;
+			}
 		}
 		if (isMovingRight) {
 			p.ix += v.ix;
+			if(inAir) {
+				p.ix -= gr.ix;
+			}
 		}
 		if (p.ix < 0) {
 			p.ix = 0;
@@ -101,37 +136,13 @@ public class Game extends JFrame implements KeyListener {
 				p.ix = 0;
 			}
 		}
-		if (jumping) {
-			falling = false;
-			p.iy += .01;
-			if (p.iy >= maxHeight) {
-				p.iy = (int) maxHeight;
-				jumping = false;
-				falling = true;
-				System.out.println(jumping);
-			}
-		}
-		if (p.iy >= maxHeight) {
-			falling = true;
-			System.err.println("I am now falling");
-			if (falling) {
-				jumping = false;
-				p.iy += v.iy;
-				if (p.iy >= 900) {
-					p.iy = 900;
-				}
-			}
-		}
-		else
-			canShoot = false;
-		
-		if(canShoot) {
+		if (canShoot) {
 			shoot(b, v, 4);
-		}
-		else
-			shoot = false;
+		} else
+			canShoot = false;
 
 	}
+
 	private void draw() {
 		// get canvas
 		Graphics2D g = (Graphics2D) strategy.getDrawGraphics();
@@ -147,11 +158,11 @@ public class Game extends JFrame implements KeyListener {
 		g.drawString(Long.toString(fps), 10, 40);
 
 		g.setColor(Color.PINK);
-		g.drawOval(p.ix, p.iy, WIDTH / 7, HEIGHT / 7);
+		g.fillOval(p.ix, p.iy, WIDTH / 7, HEIGHT / 7);
 		if (canShoot) {
 			g.setColor(Color.BLACK);
 			g.fillOval(b.ix, b.iy, WIDTH / 20, HEIGHT / 20);			
-			}
+		}
 
 		// release resources, show the buffer
 		g.dispose();
@@ -160,11 +171,12 @@ public class Game extends JFrame implements KeyListener {
 		setFocusable(true);
 
 	}
+
 	private int shoot(Vector x, Vector v, float a) {
 		x.setX(x.ix);
-		for(;;) {
-		x.ix += v.ix * a;
-		return (int) v.ix;
+		for (;;) {
+			x.ix += v.ix * a;
+			return (int) v.ix;
 		}
 	}
 
@@ -217,12 +229,18 @@ public class Game extends JFrame implements KeyListener {
 			break;
 		case KeyEvent.VK_UP:
 			jumping = true;
+			if(p.iy <= maxHeight) {
+				jumping = false;
+			}
 			break;
-		case KeyEvent.VK_DOWN:
-			break;
-		case KeyEvent.VK_SPACE: 
+		case KeyEvent.VK_SPACE:
 			canShoot = true;
-			while(b.ix )
+			while (b.ix >= 1200 && canShoot) {
+				
+				b.setX(p.ix);
+				b.setY(p.iy);
+				
+			}
 		}
 	}
 
@@ -238,12 +256,12 @@ public class Game extends JFrame implements KeyListener {
 		case KeyEvent.VK_UP:
 			falling = true;
 			break;
-		case KeyEvent.VK_SPACE:		
-			while(b.ix >= 1200 && canShoot) {
-			b.setX(WIDTH/7);
+		case KeyEvent.VK_SPACE:
+			while (b.ix >= 1200 && canShoot) {
+				b.setX(p.ix);
+				b.setX(p.iy);
 			}
-			
-			
+
 		}
 	}
 }
@@ -262,4 +280,11 @@ public class Game extends JFrame implements KeyListener {
  * 
  * Score_TOP.setPreferredSize(new Dimension(WIDTH,200)
  * 
+ **/
+/*
+ * if (jumping) { falling = false; p.iy += .01; if (p.iy >= maxHeight) { p.iy =
+ * (int) maxHeight; jumping = false; falling = true;
+ * System.out.println(jumping); } } if (p.iy >= maxHeight) { falling = true;
+ * System.err.println("I am now falling"); if (falling) { jumping = false; p.iy
+ * += v.iy; if (p.iy >= 900) { p.iy = 900; } }
  **/
