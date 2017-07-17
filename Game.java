@@ -1,11 +1,18 @@
 
 //import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
-import java.util.ArrayList;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 public class Game extends JFrame implements KeyListener {
 
@@ -40,9 +47,19 @@ public class Game extends JFrame implements KeyListener {
 	private boolean inAir;
 	private boolean canShoot;
 
+	public enum GAME_STATE {
+		MENU, 
+		PLAY,
+		EXIT
+	}
+	GAME_STATE gameState;
+
+	private JPanel MENU;
+	private JButton MENU_PLAY;
+	private JButton MENU_EXIT;
+
 	// ground
 
-	
 	// gravity vector
 	Vector gr = new Vector(2.5f, 12);
 	// speed vector
@@ -54,7 +71,6 @@ public class Game extends JFrame implements KeyListener {
 	// Player
 	Vector b = new Vector(30, 30);
 	Vector p = new Vector(30, 30);
-	
 
 	public Game(int width, int height, int fps) {
 		super("Shooty Gun");
@@ -79,6 +95,25 @@ public class Game extends JFrame implements KeyListener {
 		setResizable(false);
 		setVisible(true);
 
+		MENU = new JPanel();
+
+		MENU.setLayout(new GridLayout(1, 2));
+		MENU_PLAY.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				gameState = GAME_STATE.PLAY;
+			}
+		});
+		MENU_EXIT.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				gameState = GAME_STATE.EXIT;
+				;
+			}
+		});
+
+		MENU.add(MENU_PLAY);
+
+		MENU.add(MENU_EXIT);
+
 		// create double buffer strategy
 		createBufferStrategy(2);
 		strategy = getBufferStrategy();
@@ -88,9 +123,14 @@ public class Game extends JFrame implements KeyListener {
 
 	private void update() {
 		// update current fps
+		switch(gameState) {
+		case MENU:
+			break;
+		case PLAY:
+		
 		fps = (int) (1f / dt);
 
-		// update sprite
+		// update sprite		
 		if (p.iy > HEIGHT || p.iy <= maxHeight) {
 			inAir = true;
 		}
@@ -117,13 +157,13 @@ public class Game extends JFrame implements KeyListener {
 		}
 		if (isMovingLeft) {
 			p.ix -= v.ix;
-			if(inAir) {
+			if (inAir) {
 				p.ix += gr.ix;
 			}
 		}
 		if (isMovingRight) {
 			p.ix += v.ix;
-			if(inAir) {
+			if (inAir) {
 				p.ix -= gr.ix;
 			}
 		}
@@ -140,15 +180,20 @@ public class Game extends JFrame implements KeyListener {
 			shoot(b, v, 4);
 		} else
 			canShoot = false;
+		}
 
 	}
 
 	private void draw() {
 		// get canvas
+		switch(gameState) {
+		case MENU:
+			break;
+		case PLAY:
 		Graphics2D g = (Graphics2D) strategy.getDrawGraphics();
 
 		// clear screen
-		g.setColor(Color.blue);
+		g.setColor(Color.BLUE);
 		g.fillRect(0, 0, WIDTH, HEIGHT);
 		g.setColor(Color.GRAY);
 		g.fillRect(0, 900, WIDTH, HEIGHT);
@@ -161,7 +206,7 @@ public class Game extends JFrame implements KeyListener {
 		g.fillOval(p.ix, p.iy, WIDTH / 7, HEIGHT / 7);
 		if (canShoot) {
 			g.setColor(Color.BLACK);
-			g.fillOval(b.ix, b.iy, WIDTH / 20, HEIGHT / 20);			
+			g.fillOval(b.ix, b.iy, WIDTH / 20, HEIGHT / 20);
 		}
 
 		// release resources, show the buffer
@@ -169,6 +214,10 @@ public class Game extends JFrame implements KeyListener {
 		strategy.show();
 		addKeyListener(this);
 		setFocusable(true);
+		break;
+		case EXIT:
+			JFrame.EXIT_ON_CLOSE;
+		}
 
 	}
 
@@ -229,17 +278,17 @@ public class Game extends JFrame implements KeyListener {
 			break;
 		case KeyEvent.VK_UP:
 			jumping = true;
-			if(p.iy <= maxHeight) {
+			if (p.iy <= maxHeight) {
 				jumping = false;
 			}
 			break;
 		case KeyEvent.VK_SPACE:
 			canShoot = true;
 			while (b.ix >= 1200 && canShoot) {
-				
+
 				b.setX(p.ix);
 				b.setY(p.iy);
-				
+
 			}
 		}
 	}
@@ -265,22 +314,7 @@ public class Game extends JFrame implements KeyListener {
 		}
 	}
 }
-/*
- * BufferedImage makeImage(String path) { try return ImageIO.read({
- * newFile(System.getProperty("user.dir") + path); catch(Exception e) {
- * e.printStackTrace(); return null; } } }) }
- * 
- * Manu.add(Menu_Play);
- * 
- * Menu.setVisible(true); this.ContentPane().add(Menu, BorderLayout.SOUTH);
- * 
- * Score = JPanel(new BorderLayout()));
- * 
- * JPanel Score_Top = new JPanel(new GridLayout(1,2));
- * 
- * Score_TOP.setPreferredSize(new Dimension(WIDTH,200)
- * 
- **/
+
 /*
  * if (jumping) { falling = false; p.iy += .01; if (p.iy >= maxHeight) { p.iy =
  * (int) maxHeight; jumping = false; falling = true;
