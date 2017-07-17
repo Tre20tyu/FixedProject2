@@ -1,5 +1,6 @@
 
 //import javax.imageio.ImageIO;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -48,12 +49,11 @@ public class Game extends JFrame implements KeyListener {
 	private boolean canShoot;
 
 	public enum GAME_STATE {
-		MENU, 
-		PLAY,
-		EXIT
+		MENU, PLAY, EXIT
 	}
-	GAME_STATE gameState;
 
+	GAME_STATE gameState = GAME_STATE.MENU;
+	
 	private JPanel MENU;
 	private JButton MENU_PLAY;
 	private JButton MENU_EXIT;
@@ -92,12 +92,20 @@ public class Game extends JFrame implements KeyListener {
 
 		setIgnoreRepaint(true);
 
+		this.pack();
 		setResizable(false);
 		setVisible(true);
 
 		MENU = new JPanel();
+		
+		MENU_PLAY = new JButton();
+		MENU_EXIT = new JButton();
 
 		MENU.setLayout(new GridLayout(1, 2));
+
+		MENU_PLAY.setSize(300, 300);
+		MENU_EXIT.setSize(300, 300);
+
 		MENU_PLAY.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				gameState = GAME_STATE.PLAY;
@@ -111,7 +119,6 @@ public class Game extends JFrame implements KeyListener {
 		});
 
 		MENU.add(MENU_PLAY);
-
 		MENU.add(MENU_EXIT);
 
 		// create double buffer strategy
@@ -119,104 +126,108 @@ public class Game extends JFrame implements KeyListener {
 		strategy = getBufferStrategy();
 
 		lastFrame = System.currentTimeMillis();
+		MENU.setVisible(true);
+		this.getContentPane().add(MENU, BorderLayout.CENTER);
 	}
 
 	private void update() {
 		// update current fps
-		switch(gameState) {
+		switch (gameState) {
 		case MENU:
 			break;
 		case PLAY:
-		
-		fps = (int) (1f / dt);
+			fps = (int) (1f / dt);
 
-		// update sprite		
-		if (p.iy > HEIGHT || p.iy <= maxHeight) {
-			inAir = true;
-		}
-		if (p.iy > HEIGHT && !falling) {
-			jumping = true;
-		} else if (inAir)
-			falling = true;
-		if (jumping) {
-			falling = false;
-			p.iy -= v.iy;
+			// update sprite
+			if (p.iy > HEIGHT || p.iy <= maxHeight) {
+				inAir = true;
+			}
+			if (p.iy > HEIGHT && !falling) {
+				jumping = true;
+			} else if (inAir)
+				falling = true;
+			if (jumping) {
+				falling = false;
+				p.iy -= v.iy;
+				if (p.iy <= maxHeight) {
+					p.iy = (int) maxHeight;
+				}
+			}
 			if (p.iy <= maxHeight) {
-				p.iy = (int) maxHeight;
+				falling = true;
 			}
-		}
-		if (p.iy <= maxHeight) {
-			falling = true;
-		}
-		if (falling) {
-			jumping = false;
-			p.iy += gr.iy;
-			if (p.iy >= 900) {
-				p.iy = 900;
+			if (falling) {
+				jumping = false;
+				p.iy += gr.iy;
+				if (p.iy >= 900) {
+					p.iy = 900;
+				}
 			}
-		}
-		if (isMovingLeft) {
-			p.ix -= v.ix;
-			if (inAir) {
-				p.ix += gr.ix;
+			if (isMovingLeft) {
+				p.ix -= v.ix;
+				if (inAir) {
+					p.ix += gr.ix;
+				}
 			}
-		}
-		if (isMovingRight) {
-			p.ix += v.ix;
-			if (inAir) {
-				p.ix -= gr.ix;
+			if (isMovingRight) {
+				p.ix += v.ix;
+				if (inAir) {
+					p.ix -= gr.ix;
+				}
 			}
-		}
-		if (p.ix < 0) {
-			p.ix = 0;
-		}
-		if (p.ix < 0) {
-			p.ix += s.ix;
-			if (p.ix > 0) {
+			if (p.ix < 0) {
 				p.ix = 0;
 			}
-		}
-		if (canShoot) {
-			shoot(b, v, 4);
-		} else
-			canShoot = false;
+			if (p.ix < 0) {
+				p.ix += s.ix;
+				if (p.ix > 0) {
+					p.ix = 0;
+				}
+			}
+			if (canShoot) {
+				shoot(b, v, 4);
+			} else
+				canShoot = false;
+		default:
+			break;
 		}
 
 	}
 
 	private void draw() {
 		// get canvas
-		switch(gameState) {
+		switch (gameState) {
 		case MENU:
 			break;
 		case PLAY:
-		Graphics2D g = (Graphics2D) strategy.getDrawGraphics();
+			Graphics2D g = (Graphics2D) strategy.getDrawGraphics();
 
-		// clear screen
-		g.setColor(Color.BLUE);
-		g.fillRect(0, 0, WIDTH, HEIGHT);
-		g.setColor(Color.GRAY);
-		g.fillRect(0, 900, WIDTH, HEIGHT);
+			// clear screen
+			g.setColor(Color.BLUE);
+			g.fillRect(0, 0, WIDTH, HEIGHT);
+			g.setColor(Color.GRAY);
+			g.fillRect(0, 900, WIDTH, HEIGHT);
 
-		// draw fps
-		g.setColor(Color.GREEN);
-		g.drawString(Long.toString(fps), 10, 40);
+			// draw fps
+			g.setColor(Color.GREEN);
+			g.drawString(Long.toString(fps), 10, 40);
 
-		g.setColor(Color.PINK);
-		g.fillOval(p.ix, p.iy, WIDTH / 7, HEIGHT / 7);
-		if (canShoot) {
-			g.setColor(Color.BLACK);
-			g.fillOval(b.ix, b.iy, WIDTH / 20, HEIGHT / 20);
-		}
+			g.setColor(Color.PINK);
+			g.fillOval(p.ix, p.iy, WIDTH / 7, HEIGHT / 7);
+			if (canShoot) {
+				g.setColor(Color.BLACK);
+				g.fillOval(b.ix, b.iy, WIDTH / 20, HEIGHT / 20);
+			}
 
-		// release resources, show the buffer
-		g.dispose();
-		strategy.show();
-		addKeyListener(this);
-		setFocusable(true);
-		break;
+			// release resources, show the buffer
+			g.dispose();
+
+			strategy.show();
+			addKeyListener(this);
+			setFocusable(true);
+			break;
 		case EXIT:
-			JFrame.EXIT_ON_CLOSE;
+			System.exit(0);
 		}
 
 	}
