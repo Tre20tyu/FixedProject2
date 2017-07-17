@@ -53,7 +53,7 @@ public class Game extends JFrame implements KeyListener {
 	}
 
 	GAME_STATE gameState = GAME_STATE.MENU;
-	
+
 	private JPanel MENU;
 	private JButton MENU_PLAY;
 	private JButton MENU_EXIT;
@@ -85,30 +85,32 @@ public class Game extends JFrame implements KeyListener {
 	void init() {
 		// initialize JFrame
 		setPreferredSize(new Dimension(WIDTH, HEIGHT));
-		setLayout(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+		
 		setBounds(0, 0, WIDTH, HEIGHT);
 
 		setIgnoreRepaint(true);
 
-		this.pack();
 		setResizable(false);
 		setVisible(true);
 
 		MENU = new JPanel();
 		
-		MENU_PLAY = new JButton();
+
+		this.getContentPane().setLayout(new BorderLayout());
+
+		MENU_PLAY = new JButton("Play!");
 		MENU_EXIT = new JButton();
 
-		MENU.setLayout(new GridLayout(1, 2));
-
+		MENU.setLayout(new GridLayout(2, 1));
+		
 		MENU_PLAY.setSize(300, 300);
 		MENU_EXIT.setSize(300, 300);
 
 		MENU_PLAY.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				gameState = GAME_STATE.PLAY;
+				System.err.println(gameState);
 			}
 		});
 		MENU_EXIT.addActionListener(new ActionListener() {
@@ -121,15 +123,18 @@ public class Game extends JFrame implements KeyListener {
 		MENU.add(MENU_PLAY);
 		MENU.add(MENU_EXIT);
 
+		MENU.setVisible(true);
+		this.getContentPane().add(MENU, BorderLayout.CENTER);
+		this.pack();
+
 		// create double buffer strategy
 		createBufferStrategy(2);
 		strategy = getBufferStrategy();
 
 		lastFrame = System.currentTimeMillis();
-		MENU.setVisible(true);
-		this.getContentPane().add(MENU, BorderLayout.CENTER);
 	}
 
+	@SuppressWarnings("incomplete-switch")
 	private void update() {
 		// update current fps
 		switch (gameState) {
@@ -188,8 +193,7 @@ public class Game extends JFrame implements KeyListener {
 				shoot(b, v, 4);
 			} else
 				canShoot = false;
-		default:
-			break;
+				break;
 		}
 
 	}
