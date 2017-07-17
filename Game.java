@@ -38,11 +38,11 @@ public class Game extends JFrame implements KeyListener {
 	private boolean jumping;
 	private boolean falling;
 	private boolean shoot;
-	private boolean bulletCheck;
-	
+	private boolean canShoot;
+
 	// ground
 
-	Vector b = new Vector(8,8);
+	Vector b = new Vector(30, 30);
 	// gravity vector
 	Vector gr = new Vector(5, 5);
 	// slowing vector
@@ -121,14 +121,17 @@ public class Game extends JFrame implements KeyListener {
 					p.iy = 900;
 				}
 			}
-			}
-		
-		if(shoot) {
-			b.ix += v.ix*10;
 		}
+		else
+			canShoot = false;
+		
+		if(canShoot) {
+			shoot(b, v, 4);
+		}
+		else
+			shoot = false;
 
 	}
-
 	private void draw() {
 		// get canvas
 		Graphics2D g = (Graphics2D) strategy.getDrawGraphics();
@@ -145,18 +148,24 @@ public class Game extends JFrame implements KeyListener {
 
 		g.setColor(Color.PINK);
 		g.drawOval(p.ix, p.iy, WIDTH / 7, HEIGHT / 7);
-		if(shoot) {
+		if (canShoot) {
 			g.setColor(Color.BLACK);
-			g.fillOval(b.ix, b.iy, WIDTH/ 7, HEIGHT/7);
-		}
+			g.fillOval(b.ix, b.iy, WIDTH / 20, HEIGHT / 20);			
+			}
 
 		// release resources, show the buffer
 		g.dispose();
 		strategy.show();
 		addKeyListener(this);
 		setFocusable(true);
-		
-		
+
+	}
+	private int shoot(Vector x, Vector v, float a) {
+		x.setX(x.ix);
+		for(;;) {
+		x.ix += v.ix * a;
+		return (int) v.ix;
+		}
 	}
 
 	public void run() {
@@ -211,13 +220,9 @@ public class Game extends JFrame implements KeyListener {
 			break;
 		case KeyEvent.VK_DOWN:
 			break;
-		case KeyEvent.VK_SPACE:
-			bulletCheck = false;
-			shoot = true;
-		/*
-		 * default: isMovingRight = false; isMovingLeft = false; jumping = false;
-		 * falling = false;
-		 */
+		case KeyEvent.VK_SPACE: 
+			canShoot = true;
+			while(b.ix )
 		}
 	}
 
@@ -233,9 +238,13 @@ public class Game extends JFrame implements KeyListener {
 		case KeyEvent.VK_UP:
 			falling = true;
 			break;
-		case KeyEvent.VK_SPACE:
-			shoot = true;
+		case KeyEvent.VK_SPACE:		
+			while(b.ix >= 1200 && canShoot) {
+			b.setX(WIDTH/7);
 			}
+			
+			
+		}
 	}
 }
 /*
