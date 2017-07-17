@@ -111,6 +111,7 @@ public class Game extends JFrame implements KeyListener {
 			public void actionPerformed(ActionEvent e) {
 				gameState = GAME_STATE.PLAY;
 				System.err.println(gameState);
+				MENU.setVisible(false);
 			}
 		});
 		MENU_EXIT.addActionListener(new ActionListener() {
@@ -134,7 +135,6 @@ public class Game extends JFrame implements KeyListener {
 		lastFrame = System.currentTimeMillis();
 	}
 
-	@SuppressWarnings("incomplete-switch")
 	private void update() {
 		// update current fps
 		switch (gameState) {
@@ -193,7 +193,7 @@ public class Game extends JFrame implements KeyListener {
 				shoot(b, v, 4);
 			} else
 				canShoot = false;
-				break;
+			break;
 		}
 
 	}
