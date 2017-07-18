@@ -39,7 +39,7 @@ public class Game extends JFrame implements KeyListener {
 	private long startFrame;
 	private int fps;
 
-	private double maxHeight = 500;
+	private double maxHeight = 0;
 
 	private boolean isMovingRight = false;
 	private boolean isMovingLeft = false;
@@ -89,11 +89,6 @@ public class Game extends JFrame implements KeyListener {
 
 		setBounds(0, 0, WIDTH, HEIGHT);
 
-		setIgnoreRepaint(true);
-
-		setResizable(false);
-		setVisible(true);
-
 		MENU = new JPanel();
 
 		this.getContentPane().setLayout(new BorderLayout());
@@ -125,12 +120,20 @@ public class Game extends JFrame implements KeyListener {
 
 		MENU.setVisible(true);
 		this.getContentPane().add(MENU, BorderLayout.CENTER);
-		this.pack();
+		// this.pack();
+
+		setIgnoreRepaint(true);
+
+		setResizable(false);
+		setVisible(true);
+
 	
 		// create double buffer strategy
 		createBufferStrategy(2);
 		strategy = getBufferStrategy();
 
+		addKeyListener(this);
+		setFocusable(true);
 		lastFrame = System.currentTimeMillis();
 	}
 
@@ -229,9 +232,6 @@ public class Game extends JFrame implements KeyListener {
 			g.dispose();
 
 			
-			addKeyListener(this);
-			setFocusable(true);
-			setVisible(true);
 			strategy.show();
 			break;
 		case EXIT:
