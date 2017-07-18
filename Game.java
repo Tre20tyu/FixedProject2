@@ -86,7 +86,7 @@ public class Game extends JFrame implements KeyListener {
 		// initialize JFrame
 		setPreferredSize(new Dimension(WIDTH, HEIGHT));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
 		setBounds(0, 0, WIDTH, HEIGHT);
 
 		setIgnoreRepaint(true);
@@ -95,23 +95,21 @@ public class Game extends JFrame implements KeyListener {
 		setVisible(true);
 
 		MENU = new JPanel();
-		
 
 		this.getContentPane().setLayout(new BorderLayout());
 
 		MENU_PLAY = new JButton("Play!");
-		MENU_EXIT = new JButton();
+		MENU_EXIT = new JButton("Exit!");
 
 		MENU.setLayout(new GridLayout(2, 1));
-		
+
 		MENU_PLAY.setSize(300, 300);
 		MENU_EXIT.setSize(300, 300);
 
 		MENU_PLAY.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				gameState = GAME_STATE.PLAY;
-				System.err.println(gameState);
 				MENU.setVisible(false);
+				gameState = GAME_STATE.PLAY;
 			}
 		});
 		MENU_EXIT.addActionListener(new ActionListener() {
@@ -120,6 +118,7 @@ public class Game extends JFrame implements KeyListener {
 				;
 			}
 		});
+	
 
 		MENU.add(MENU_PLAY);
 		MENU.add(MENU_EXIT);
@@ -127,7 +126,7 @@ public class Game extends JFrame implements KeyListener {
 		MENU.setVisible(true);
 		this.getContentPane().add(MENU, BorderLayout.CENTER);
 		this.pack();
-
+	
 		// create double buffer strategy
 		createBufferStrategy(2);
 		strategy = getBufferStrategy();
@@ -194,8 +193,11 @@ public class Game extends JFrame implements KeyListener {
 			} else
 				canShoot = false;
 			break;
+		case EXIT:
+			break;
+	//	default:
+	//		break;
 		}
-
 	}
 
 	private void draw() {
@@ -226,9 +228,11 @@ public class Game extends JFrame implements KeyListener {
 			// release resources, show the buffer
 			g.dispose();
 
-			strategy.show();
+			
 			addKeyListener(this);
 			setFocusable(true);
+			setVisible(true);
+			strategy.show();
 			break;
 		case EXIT:
 			System.exit(0);
@@ -300,10 +304,8 @@ public class Game extends JFrame implements KeyListener {
 		case KeyEvent.VK_SPACE:
 			canShoot = true;
 			while (b.ix >= 1200 && canShoot) {
-
 				b.setX(p.ix);
-				b.setY(p.iy);
-
+				b.setY(p.iy);                           
 			}
 		}
 	}
