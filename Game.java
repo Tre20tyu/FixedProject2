@@ -20,7 +20,7 @@ public class Game extends JFrame implements KeyListener {
 	/**
 	 * 
 	 */
-	
+
 	int i = 0;
 	private static final long serialVersionUID = 1L;
 	// window vars
@@ -50,7 +50,7 @@ public class Game extends JFrame implements KeyListener {
 	private boolean inAir;
 	private boolean canShoot;
 	private boolean canJump;
-	
+
 	public enum GAME_STATE {
 		MENU, PLAY, WIN, EXIT
 	}
@@ -74,7 +74,7 @@ public class Game extends JFrame implements KeyListener {
 	// Player
 	Vector b = new Vector(30, 30);
 	Vector fb = new Vector(10, 10);
-	Vector fbv = new Vector(10,0);
+	Vector fbv = new Vector(10, 0);
 	Vector p = new Vector(30, 30);
 
 	public Game(int width, int height, int fps) {
@@ -86,7 +86,7 @@ public class Game extends JFrame implements KeyListener {
 		p = new Vector(WIDTH / 10, 900);
 		fb = new Vector(WIDTH / 10 + WIDTH / 8 * 6, 950);
 		// fbv
-		
+
 		b = new Vector(WIDTH / 2 - WIDTH / 10, 950);
 	}
 
@@ -150,8 +150,8 @@ public class Game extends JFrame implements KeyListener {
 			break;
 		case PLAY:
 			fps = (int) (1f / dt);
-					
-			// update sprite			
+
+			// update sprite
 			if (p.iy > HEIGHT || p.iy <= maxHeight) {
 				inAir = true;
 			}
@@ -161,11 +161,11 @@ public class Game extends JFrame implements KeyListener {
 				falling = true;
 			if (jumping) {
 				falling = false;
-				p.setY(p.iy-p.iy*dt*5);
+				p.setY(p.iy - p.iy * dt * 5);
 			}
 			if (p.iy <= maxHeight) {
 				falling = true;
-			}		
+			}
 			if (falling) {
 				jumping = false;
 				p.iy += gr.iy;
@@ -198,60 +198,18 @@ public class Game extends JFrame implements KeyListener {
 				shoot(b, v, 4);
 			} else
 				canShoot = false;
-			if(Vector.sub(fb, b).sqmag() < Math.pow(WIDTH/10 + WIDTH/5 , 2)) {
+			if (Vector.sub(fb, b).sqmag() < Math.pow(WIDTH / 10 + WIDTH / 5, 2)) {
 				i++;
-				System.out.println("You WIN" + i);
+				System.out.println("You WIN " + i + "times");
 			}
-			if(Vector.sub(p, fb).sqmag() < Math.pow(WIDTH/3.5f + WIDTH/10, 2))
-				for(;;) {
-					for(;;) {
-						for(;;) {
-							for(;;) {
-								for(;;) {
-									for(;;) {
-										for(;;) {
-											for(;;) {
-												for(;;) {
-													for(;;) {
-														for(;;) {
-															for(;;) {
-																for(;;) {
-																	for(;;) {
-																		for(;;) {
-																			for(;;) {
-																				for(;;) {
-																					for(;;) {
-																						for(;;) {
-																							for(;;) {
-																								for(;;) {
-																									System.out.println("LOLOLOL");
-																								}
-																							}
-																						}
-																					}
-																				}
-																			}
-																		}
-																		
-																	}
-																}
-															}
-														}
-													}
-												}
-											}
-											
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			
+			if (Vector.sub(p, fb).sqmag() < Math.pow(WIDTH / 3.5 + WIDTH / 5, 2)) {
+				System.out.println("Collide " + i);
+				crash();
+			}
+
 			break;
 		case EXIT:
-			break;			
+			break;
 		// default:
 		// break;
 		default:
@@ -261,15 +219,14 @@ public class Game extends JFrame implements KeyListener {
 
 	private void draw() {
 		// get canvas
-		
+
 		// init graphics
 		Graphics2D g = (Graphics2D) strategy.getDrawGraphics();
 		switch (gameState) {
 		case MENU:
 			break;
-			
+
 		case PLAY:
-			
 
 			// clear screen
 			g.setColor(Color.BLUE);
@@ -285,9 +242,6 @@ public class Game extends JFrame implements KeyListener {
 			g.setColor(Color.PINK);
 			g.fillOval(p.ix, p.iy, WIDTH / 7, HEIGHT / 7);
 
-			g.setColor(makeRandomColor());
-			g.fillOval(fb.ix, fb.iy, WIDTH / 10, HEIGHT / 10);			
-			
 			// draw bullet
 			if (canShoot) {
 				g.setColor(Color.BLACK);
@@ -295,7 +249,8 @@ public class Game extends JFrame implements KeyListener {
 			}
 
 			// draw final boss
-			
+			g.setColor(makeRandomColor());
+			g.fillOval(fb.ix, fb.iy, WIDTH / 10, HEIGHT / 10);
 
 			// release resources, show the buffer
 			g.dispose();
@@ -306,12 +261,11 @@ public class Game extends JFrame implements KeyListener {
 			System.exit(0);
 		case WIN:
 			g.setColor(Color.red.brighter().brighter().brighter().brighter().brighter().brighter());
-			g.drawString("You Win", WIDTH/2, HEIGHT/2);
+			g.drawString("You Win", WIDTH / 2, HEIGHT / 2);
 			break;
 		default:
 			break;
 		}
-
 
 	}
 
@@ -322,16 +276,15 @@ public class Game extends JFrame implements KeyListener {
 			return (int) v.ix;
 		}
 	}
+
 	public Color makeRandomColor() {
-		return new Color(
-			(int) (Math.random() * 255),
-			(int) (Math.random() * 255),
-			(int) (Math.random() * 5)
-			);
-		
-		
+		return new Color((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 5));
+
 	}
-	
+
+	public void crash() {
+		crash();
+	}
 
 	public void run() {
 		init();
@@ -390,7 +343,7 @@ public class Game extends JFrame implements KeyListener {
 			canShoot = true;
 			while (b.ix >= 1200 && canShoot) {
 				b.setX(p.ix);
-				b.setY(p.iy+50);
+				b.setY(p.iy + 50);
 			}
 		}
 	}
@@ -408,7 +361,8 @@ public class Game extends JFrame implements KeyListener {
 			falling = true;
 			break;
 		case KeyEvent.VK_SPACE:
-			canShoot = true;}
+			canShoot = true;
+		}
 	}
 }
 
