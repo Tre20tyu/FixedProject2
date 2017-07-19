@@ -20,6 +20,8 @@ public class Game extends JFrame implements KeyListener {
 	/**
 	 * 
 	 */
+	
+	int i = 0;
 	private static final long serialVersionUID = 1L;
 	// window vars
 	private final int MAX_FPS;
@@ -47,9 +49,10 @@ public class Game extends JFrame implements KeyListener {
 	private boolean falling;
 	private boolean inAir;
 	private boolean canShoot;
-
+	private boolean canJump;
+	
 	public enum GAME_STATE {
-		MENU, PLAY, EXIT
+		MENU, PLAY, WIN, EXIT
 	}
 
 	GAME_STATE gameState = GAME_STATE.MENU;
@@ -70,6 +73,8 @@ public class Game extends JFrame implements KeyListener {
 	// positional vectors
 	// Player
 	Vector b = new Vector(30, 30);
+	Vector fb = new Vector(10, 10);
+	Vector fbv = new Vector(10,0);
 	Vector p = new Vector(30, 30);
 
 	public Game(int width, int height, int fps) {
@@ -78,7 +83,10 @@ public class Game extends JFrame implements KeyListener {
 		this.WIDTH = width;
 		this.HEIGHT = height;
 
-		p = new Vector(WIDTH / 2 - WIDTH / 10, 900);
+		p = new Vector(WIDTH / 10, 900);
+		fb = new Vector(WIDTH / 10 + WIDTH / 8 * 6, 950);
+		// fbv
+		
 		b = new Vector(WIDTH / 2 - WIDTH / 10, 950);
 	}
 
@@ -113,7 +121,6 @@ public class Game extends JFrame implements KeyListener {
 				;
 			}
 		});
-	
 
 		MENU.add(MENU_PLAY);
 		MENU.add(MENU_EXIT);
@@ -127,7 +134,6 @@ public class Game extends JFrame implements KeyListener {
 		setResizable(false);
 		setVisible(true);
 
-	
 		// create double buffer strategy
 		createBufferStrategy(2);
 		strategy = getBufferStrategy();
@@ -144,25 +150,22 @@ public class Game extends JFrame implements KeyListener {
 			break;
 		case PLAY:
 			fps = (int) (1f / dt);
-
-			// update sprite
+					
+			// update sprite			
 			if (p.iy > HEIGHT || p.iy <= maxHeight) {
 				inAir = true;
 			}
-			if (p.iy > HEIGHT && !falling) {
+			if (p.iy > HEIGHT && !falling && canJump) {
 				jumping = true;
 			} else if (inAir)
 				falling = true;
 			if (jumping) {
 				falling = false;
-				p.iy -= v.iy;
-				if (p.iy <= maxHeight) {
-					p.iy = (int) maxHeight;
-				}
+				p.setY(p.iy-p.iy*dt*5);
 			}
 			if (p.iy <= maxHeight) {
 				falling = true;
-			}
+			}		
 			if (falling) {
 				jumping = false;
 				p.iy += gr.iy;
@@ -195,21 +198,78 @@ public class Game extends JFrame implements KeyListener {
 				shoot(b, v, 4);
 			} else
 				canShoot = false;
+			if(Vector.sub(fb, b).sqmag() < Math.pow(WIDTH/10 + WIDTH/5 , 2)) {
+				i++;
+				System.out.println("You WIN" + i);
+			}
+			if(Vector.sub(p, fb).sqmag() < Math.pow(WIDTH/3.5f + WIDTH/10, 2))
+				for(;;) {
+					for(;;) {
+						for(;;) {
+							for(;;) {
+								for(;;) {
+									for(;;) {
+										for(;;) {
+											for(;;) {
+												for(;;) {
+													for(;;) {
+														for(;;) {
+															for(;;) {
+																for(;;) {
+																	for(;;) {
+																		for(;;) {
+																			for(;;) {
+																				for(;;) {
+																					for(;;) {
+																						for(;;) {
+																							for(;;) {
+																								for(;;) {
+																									System.out.println("LOLOLOL");
+																								}
+																							}
+																						}
+																					}
+																				}
+																			}
+																		}
+																		
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+											
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			
 			break;
 		case EXIT:
+			break;			
+		// default:
+		// break;
+		default:
 			break;
-	//	default:
-	//		break;
 		}
 	}
 
 	private void draw() {
 		// get canvas
+		
+		// init graphics
+		Graphics2D g = (Graphics2D) strategy.getDrawGraphics();
 		switch (gameState) {
 		case MENU:
 			break;
+			
 		case PLAY:
-			Graphics2D g = (Graphics2D) strategy.getDrawGraphics();
+			
 
 			// clear screen
 			g.setColor(Color.BLUE);
@@ -221,22 +281,37 @@ public class Game extends JFrame implements KeyListener {
 			g.setColor(Color.GREEN);
 			g.drawString(Long.toString(fps), 10, 40);
 
+			// draw player
 			g.setColor(Color.PINK);
 			g.fillOval(p.ix, p.iy, WIDTH / 7, HEIGHT / 7);
+
+			g.setColor(makeRandomColor());
+			g.fillOval(fb.ix, fb.iy, WIDTH / 10, HEIGHT / 10);			
+			
+			// draw bullet
 			if (canShoot) {
 				g.setColor(Color.BLACK);
 				g.fillOval(b.ix, b.iy, WIDTH / 20, HEIGHT / 20);
 			}
 
+			// draw final boss
+			
+
 			// release resources, show the buffer
 			g.dispose();
 
-			
 			strategy.show();
 			break;
 		case EXIT:
 			System.exit(0);
+		case WIN:
+			g.setColor(Color.red.brighter().brighter().brighter().brighter().brighter().brighter());
+			g.drawString("You Win", WIDTH/2, HEIGHT/2);
+			break;
+		default:
+			break;
 		}
+
 
 	}
 
@@ -247,6 +322,16 @@ public class Game extends JFrame implements KeyListener {
 			return (int) v.ix;
 		}
 	}
+	public Color makeRandomColor() {
+		return new Color(
+			(int) (Math.random() * 255),
+			(int) (Math.random() * 255),
+			(int) (Math.random() * 5)
+			);
+		
+		
+	}
+	
 
 	public void run() {
 		init();
@@ -305,7 +390,7 @@ public class Game extends JFrame implements KeyListener {
 			canShoot = true;
 			while (b.ix >= 1200 && canShoot) {
 				b.setX(p.ix);
-				b.setY(p.iy);                           
+				b.setY(p.iy+50);
 			}
 		}
 	}
@@ -323,12 +408,7 @@ public class Game extends JFrame implements KeyListener {
 			falling = true;
 			break;
 		case KeyEvent.VK_SPACE:
-			while (b.ix >= 1200 && canShoot) {
-				b.setX(p.ix);
-				b.setX(p.iy);
-			}
-
-		}
+			canShoot = true;}
 	}
 }
 
