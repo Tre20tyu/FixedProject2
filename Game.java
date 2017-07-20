@@ -30,6 +30,7 @@ public class Game extends JFrame implements KeyListener {
 
 	// double buffer
 	private BufferStrategy strategy;
+	private TileMap tileMap;
 
 	// loop variables
 	private boolean isRunning = true;
@@ -41,15 +42,15 @@ public class Game extends JFrame implements KeyListener {
 	private long startFrame;
 	private int fps;
 
-	private double maxHeight = 0;
+	private double maxSpeed = 8;
+	private double maxHeight;
+	private double maxFalling;
 
 	private boolean isMovingRight = false;
 	private boolean isMovingLeft = false;
 	private boolean jumping;
 	private boolean falling;
-	private boolean inAir;
 	private boolean canShoot;
-	private boolean canJump;
 
 	public enum GAME_STATE {
 		MENU, PLAY, WIN, EXIT
@@ -64,10 +65,10 @@ public class Game extends JFrame implements KeyListener {
 	// ground
 
 	// gravity vector
-	Vector gr = new Vector(2.5f, 12);
+	Vector gr = new Vector(0.64f, 12);
 	// speed vector
 	// Drag
-	Vector s = new Vector(1, 1);
+	Vector s = new Vector((float)0.52, 1);
 	// Speed
 	Vector v = new Vector(8, 15);
 	// positional vectors
@@ -98,7 +99,7 @@ public class Game extends JFrame implements KeyListener {
 		setBounds(0, 0, WIDTH, HEIGHT);
 
 		MENU = new JPanel();
-
+		tileMap = new TileMap("tilemap.txt", 42);
 		this.getContentPane().setLayout(new BorderLayout());
 
 		MENU_PLAY = new JButton("Play!");
@@ -150,50 +151,49 @@ public class Game extends JFrame implements KeyListener {
 			break;
 		case PLAY:
 			fps = (int) (1f / dt);
-
+			tileMap.update();
 			// update sprite
-			if (p.iy > HEIGHT || p.iy <= maxHeight) {
-				inAir = true;
-			}
-			if (p.iy > HEIGHT && !falling && canJump) {
-				jumping = true;
-			} else if (inAir)
-				falling = true;
-			if (jumping) {
-				falling = false;
-				p.setY(p.iy - p.iy * dt * 5);
-			}
-			if (p.iy <= maxHeight) {
-				falling = true;
-			}
-			if (falling) {
-				jumping = false;
-				p.iy += gr.iy;
-				if (p.iy >= 900) {
-					p.iy = 900;
-				}
-			}
 			if (isMovingLeft) {
 				p.ix -= v.ix;
-				if (inAir) {
-					p.ix += gr.ix;
+				if (v.ix < maxSpeed) {
+					v.ix = (int) maxSpeed;
 				}
 			}
 			if (isMovingRight) {
 				p.ix += v.ix;
-				if (inAir) {
-					p.ix -= gr.ix;
+				if (v.ix < maxSpeed) {
+					v.ix = (int) maxSpeed;
 				}
-			}
-			if (p.ix < 0) {
-				p.ix = 0;
-			}
-			if (p.ix < 0) {
-				p.ix += s.ix;
+			} else {
 				if (p.ix > 0) {
-					p.ix = 0;
+					p.ix -= s.ix;
+					if (p.ix < 0) {
+						p.ix = 0;
+					}
+				}
+				else if(p.ix < 0) {
+					p.ix += s.ix;
+					if(p.ix > 0) {
+						p.ix = 0;
+					}
+				}
+				if(jumping) {
+					p.iy = 300;
+					
+					jumping = false;
+					falling = true;
+				}
+				if(falling) {
+					p.iy += gr.iy;
+					if(p.iy > 900) {
+						p.iy = 900;
+					}
+				}
+				else {
+					v.iy = 0;
 				}
 			}
+
 			if (canShoot) {
 				shoot(b, v, 4);
 			} else
@@ -233,7 +233,9 @@ public class Game extends JFrame implements KeyListener {
 			g.fillRect(0, 0, WIDTH, HEIGHT);
 			g.setColor(Color.GRAY);
 			g.fillRect(0, 900, WIDTH, HEIGHT);
-
+			
+			// draw tilemap			
+			tileMap.draw(g);
 			// draw fps
 			g.setColor(Color.GREEN);
 			g.drawString(Long.toString(fps), 10, 40);
@@ -254,7 +256,7 @@ public class Game extends JFrame implements KeyListener {
 
 			// release resources, show the buffer
 			g.dispose();
-
+		
 			strategy.show();
 			break;
 		case EXIT:
@@ -335,9 +337,6 @@ public class Game extends JFrame implements KeyListener {
 			break;
 		case KeyEvent.VK_UP:
 			jumping = true;
-			if (p.iy <= maxHeight) {
-				jumping = false;
-			}
 			break;
 		case KeyEvent.VK_SPACE:
 			canShoot = true;
@@ -358,18 +357,9 @@ public class Game extends JFrame implements KeyListener {
 			isMovingLeft = false;
 			break;
 		case KeyEvent.VK_UP:
-			falling = true;
 			break;
 		case KeyEvent.VK_SPACE:
 			canShoot = true;
 		}
 	}
 }
-
-/*
- * if (jumping) { falling = false; p.iy += .01; if (p.iy >= maxHeight) { p.iy =
- * (int) maxHeight; jumping = false; falling = true;
- * System.out.println(jumping); } } if (p.iy >= maxHeight) { falling = true;
- * System.err.println("I am now falling"); if (falling) { jumping = false; p.iy
- * += v.iy; if (p.iy >= 900) { p.iy = 900; } }
- **/
