@@ -3,6 +3,7 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -30,7 +31,7 @@ public class Game extends JFrame implements KeyListener {
 
 	// double buffer
 	private BufferStrategy strategy;
-	private TileMap tileMap;
+//	private TileMap tileMap;
 
 	// loop variables
 	private boolean isRunning = true;
@@ -45,6 +46,7 @@ public class Game extends JFrame implements KeyListener {
 	private double maxSpeed = 8;
 	private double maxHeight;
 	private double maxFalling;
+	private double bossHealth;
 
 	private boolean isMovingRight = false;
 	private boolean isMovingLeft = false;
@@ -68,7 +70,7 @@ public class Game extends JFrame implements KeyListener {
 	Vector gr = new Vector(0.64f, 12);
 	// speed vector
 	// Drag
-	Vector s = new Vector((float)0.52, 1);
+	Vector s = new Vector((float) 0.52, 1);
 	// Speed
 	Vector v = new Vector(8, 15);
 	// positional vectors
@@ -89,6 +91,7 @@ public class Game extends JFrame implements KeyListener {
 		// fbv
 
 		b = new Vector(WIDTH / 2 - WIDTH / 10, 950);
+		bossHealth = 0;
 	}
 
 	void init() {
@@ -99,7 +102,7 @@ public class Game extends JFrame implements KeyListener {
 		setBounds(0, 0, WIDTH, HEIGHT);
 
 		MENU = new JPanel();
-		tileMap = new TileMap("tilemap.txt", 42);
+//		tileMap = new TileMap("tilemap.txt", 42);
 		this.getContentPane().setLayout(new BorderLayout());
 
 		MENU_PLAY = new JButton("Play!");
@@ -151,7 +154,7 @@ public class Game extends JFrame implements KeyListener {
 			break;
 		case PLAY:
 			fps = (int) (1f / dt);
-			tileMap.update();
+//			tileMap.update();
 			// update sprite
 			if (isMovingLeft) {
 				p.ix -= v.ix;
@@ -170,26 +173,23 @@ public class Game extends JFrame implements KeyListener {
 					if (p.ix < 0) {
 						p.ix = 0;
 					}
-				}
-				else if(p.ix < 0) {
+				} else if (p.ix < 0) {
 					p.ix += s.ix;
-					if(p.ix > 0) {
+					if (p.ix > 0) {
 						p.ix = 0;
 					}
 				}
-				if(jumping) {
-					p.iy = 300;
-					
+				if (jumping) {
+					p.iy = 11;
 					jumping = false;
 					falling = true;
 				}
-				if(falling) {
+				if (falling) {
 					p.iy += gr.iy;
-					if(p.iy > 900) {
+					if (p.iy > 900) {
 						p.iy = 900;
 					}
-				}
-				else {
+				} else {
 					v.iy = 0;
 				}
 			}
@@ -198,15 +198,21 @@ public class Game extends JFrame implements KeyListener {
 				shoot(b, v, 4);
 			} else
 				canShoot = false;
+
 			if (Vector.sub(fb, b).sqmag() < Math.pow(WIDTH / 10 + WIDTH / 5, 2)) {
-				i++;
-				System.out.println("You WIN " + i + "times");
+				bossHealth++;
+				System.out.println(bossHealth);
+				if(bossHealth == 500){
+				System.out.println(bossHealth);
+				gameState = GAME_STATE.WIN;
+				}
 			}
 			if (Vector.sub(p, fb).sqmag() < Math.pow(WIDTH / 3.5 + WIDTH / 5, 2)) {
 				System.out.println("Collide " + i);
 				crash();
 			}
-
+			break;
+		case WIN:
 			break;
 		case EXIT:
 			break;
@@ -231,11 +237,9 @@ public class Game extends JFrame implements KeyListener {
 			// clear screen
 			g.setColor(Color.BLUE);
 			g.fillRect(0, 0, WIDTH, HEIGHT);
-			g.setColor(Color.GRAY);
-			g.fillRect(0, 900, WIDTH, HEIGHT);
-			
-			// draw tilemap			
-			tileMap.draw(g);
+
+			// draw tilemap
+//			tileMap.draw(g);
 			// draw fps
 			g.setColor(Color.GREEN);
 			g.drawString(Long.toString(fps), 10, 40);
@@ -256,14 +260,21 @@ public class Game extends JFrame implements KeyListener {
 
 			// release resources, show the buffer
 			g.dispose();
-		
+
 			strategy.show();
 			break;
 		case EXIT:
 			System.exit(0);
 		case WIN:
-			g.setColor(Color.red.brighter().brighter().brighter().brighter().brighter().brighter());
-			g.drawString("You Win", WIDTH / 2, HEIGHT / 2);
+			Font font = new Font("Courier", Font.BOLD,60);
+			g.setColor(Color.WHITE.brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter());
+			g.fillRect(0, 0, WIDTH, HEIGHT);
+			g.setColor(makeRandomColor());
+			g.setFont(font);
+			g.drawString("You Win !", WIDTH / 2 - 150, HEIGHT / 2);
+			g.dispose();
+
+			strategy.show();
 			break;
 		default:
 			break;
