@@ -31,7 +31,7 @@ public class Game extends JFrame implements KeyListener {
 
 	// double buffer
 	private BufferStrategy strategy;
-//	private TileMap tileMap;
+	// private TileMap tileMap;
 
 	// loop variables
 	private boolean isRunning = true;
@@ -46,13 +46,19 @@ public class Game extends JFrame implements KeyListener {
 	private double maxSpeed = 8;
 	private double maxHeight;
 	private double maxFalling;
-	private double bossHealth;
 
 	private boolean isMovingRight = false;
 	private boolean isMovingLeft = false;
 	private boolean jumping;
 	private boolean falling;
 	private boolean canShoot;
+
+	// Boss variables
+	private double hrate;
+	private double maxBossHealth;
+	private double hBarLength;
+	private double cBossHealth;
+	private double bossDmg;
 
 	public enum GAME_STATE {
 		MENU, PLAY, WIN, EXIT
@@ -76,8 +82,8 @@ public class Game extends JFrame implements KeyListener {
 	// positional vectors
 	// Player
 	Vector b = new Vector(30, 30);
-	Vector fb = new Vector(10, 10);
-	Vector fbv = new Vector(10, 0);
+	Vector fb = new Vector(100, 100);
+	Vector fbv = new Vector(10, 10);
 	Vector p = new Vector(30, 30);
 
 	public Game(int width, int height, int fps) {
@@ -87,11 +93,11 @@ public class Game extends JFrame implements KeyListener {
 		this.HEIGHT = height;
 
 		p = new Vector(WIDTH / 10, 900);
-		fb = new Vector(WIDTH / 10 + WIDTH / 8 * 6, 950);
 		// fbv
 
 		b = new Vector(WIDTH / 2 - WIDTH / 10, 950);
-		bossHealth = 0;
+		maxBossHealth = 500;
+
 	}
 
 	void init() {
@@ -102,7 +108,7 @@ public class Game extends JFrame implements KeyListener {
 		setBounds(0, 0, WIDTH, HEIGHT);
 
 		MENU = new JPanel();
-//		tileMap = new TileMap("tilemap.txt", 42);
+		// tileMap = new TileMap("tilemap.txt", 42);
 		this.getContentPane().setLayout(new BorderLayout());
 
 		MENU_PLAY = new JButton("Play!");
@@ -154,8 +160,9 @@ public class Game extends JFrame implements KeyListener {
 			break;
 		case PLAY:
 			fps = (int) (1f / dt);
-//			tileMap.update();
+			// tileMap.update();
 			// update sprite
+			////////////////////////////////////////////////////////////////////////////////////
 			if (isMovingLeft) {
 				p.ix -= v.ix;
 				if (v.ix < maxSpeed) {
@@ -198,19 +205,53 @@ public class Game extends JFrame implements KeyListener {
 				shoot(b, v, 4);
 			} else
 				canShoot = false;
-
-			if (Vector.sub(fb, b).sqmag() < Math.pow(WIDTH / 10 + WIDTH / 5, 2)) {
-				bossHealth++;
-				System.out.println(bossHealth);
-				if(bossHealth == 500){
-				System.out.println(bossHealth);
-				gameState = GAME_STATE.WIN;
+			if (Vector.sub(fb, b).mag() < ((WIDTH / 10) + (WIDTH / 20))) {
+				System.out.println("Bullet hit boss");
+				bossDmg++;
+				cBossHealth = maxBossHealth - bossDmg;
+				hrate = cBossHealth / maxBossHealth;
+				hBarLength = 100 * hrate;
+			//	System.out.println(bossDmg);
+				if (bossDmg == 500) {
+					gameState = GAME_STATE.WIN;
 				}
+
+				System.out.println();
+
 			}
 			if (Vector.sub(p, fb).sqmag() < Math.pow(WIDTH / 3.5 + WIDTH / 5, 2)) {
-				System.out.println("Collide " + i);
-				crash();
+				System.out.println("Player hit boss");
+			//	crash();
 			}
+			///////////////////////////////////////////////////////////////////////////////////////////
+			// If so, adjust the position and speed.
+			fb.ix += fbv.ix;
+			fb.iy += fbv.iy;
+			
+			if(fb.ix < WIDTH/100 || fb.ix > 1200 - WIDTH/100) {
+				fbv.setX(-fbv.ix);
+			}
+			if(fb.iy < HEIGHT/100 || fb.iy > 900 - HEIGHT/100) {
+				fbv.setY(-fbv.iy);
+			}
+			
+				
+		/*	if (fb.ix - WIDTH / 5 < 0) {
+				fbv.ix = -fbv.ix; // Reflect along normal
+				fb.ix = WIDTH / 5; // Re-position the ball at the edge
+			} else if (fb.ix + WIDTH / 5 > WIDTH) {
+				fbv.ix = -fbv.ix;
+				fb.ix = WIDTH - WIDTH / 5;
+			}
+			// May cross both x and y bounds
+			if (fb.iy - WIDTH / 5 < 0) {
+				fbv.iy = -fbv.iy;
+				fb.iy = WIDTH / 5;
+			} else if (fb.iy + WIDTH / 5 > HEIGHT) {
+				fbv.iy = -fbv.iy;
+				fb.iy = HEIGHT - WIDTH / 5;
+		*/	
+			/////////////////////////////////////////////////////////////////////////////////////////////
 			break;
 		case WIN:
 			break;
@@ -221,8 +262,10 @@ public class Game extends JFrame implements KeyListener {
 		default:
 			break;
 		}
+
 	}
 
+	@SuppressWarnings("null")
 	private void draw() {
 		// get canvas
 
@@ -239,7 +282,7 @@ public class Game extends JFrame implements KeyListener {
 			g.fillRect(0, 0, WIDTH, HEIGHT);
 
 			// draw tilemap
-//			tileMap.draw(g);
+			// tileMap.draw(g);
 			// draw fps
 			g.setColor(Color.GREEN);
 			g.drawString(Long.toString(fps), 10, 40);
@@ -258,6 +301,12 @@ public class Game extends JFrame implements KeyListener {
 			g.setColor(makeRandomColor());
 			g.fillOval(fb.ix, fb.iy, WIDTH / 10, HEIGHT / 10);
 
+			// draw health bar
+			g.setColor(Color.BLACK.darker());
+			g.fillRect(fb.ix, fb.iy - 50, 100, 40);
+			g.setColor(Color.RED);
+			g.fillRect(fb.ix, fb.iy - 50, (int) hBarLength, 40);
+
 			// release resources, show the buffer
 			g.dispose();
 
@@ -266,8 +315,8 @@ public class Game extends JFrame implements KeyListener {
 		case EXIT:
 			System.exit(0);
 		case WIN:
-			Font font = new Font("Courier", Font.BOLD,60);
-			g.setColor(Color.WHITE.brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter());
+			Font font = new Font("Courier", Font.BOLD, 60);
+			g.setColor(Color.WHITE);
 			g.fillRect(0, 0, WIDTH, HEIGHT);
 			g.setColor(makeRandomColor());
 			g.setFont(font);
