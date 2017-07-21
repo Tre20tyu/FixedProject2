@@ -1,4 +1,3 @@
-
 //import javax.imageio.ImageIO;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -52,7 +51,9 @@ public class Game extends JFrame implements KeyListener {
 	private boolean jumping;
 	private boolean falling;
 	private boolean canShoot;
+	private long Score;
 
+	float Timer = 0.0f;
 	// Boss variables
 	private double hrate;
 	private double maxBossHealth;
@@ -87,16 +88,17 @@ public class Game extends JFrame implements KeyListener {
 	Vector p = new Vector(30, 30);
 
 	public Game(int width, int height, int fps) {
-		super("Shooty Gun");
+		super("Don't Ask");
 		this.MAX_FPS = fps;
 		this.WIDTH = width;
 		this.HEIGHT = height;
 
+		Score = 0;
 		p = new Vector(WIDTH / 10, 900);
 		// fbv
 
-		b = new Vector(WIDTH / 2 - WIDTH / 10, 950);
-		maxBossHealth = 500;
+		 b = new Vector(WIDTH / 2 - WIDTH / 10, 950);
+		maxBossHealth = 100;
 
 	}
 
@@ -138,7 +140,7 @@ public class Game extends JFrame implements KeyListener {
 		MENU.setVisible(true);
 		this.getContentPane().add(MENU, BorderLayout.CENTER);
 		// this.pack();
-
+		
 		setIgnoreRepaint(true);
 
 		setResizable(false);
@@ -205,24 +207,27 @@ public class Game extends JFrame implements KeyListener {
 				shoot(b, v, 4);
 			} else
 				canShoot = false;
-			if (Vector.sub(fb, b).mag() < ((WIDTH / 10) + (WIDTH / 20))) {
-				System.out.println("Bullet hit boss");
+			
+			if (Vector.sub(fb, b).sqmag() < Math.pow((WIDTH / 10) + (WIDTH / 20), 2)) {
+				System.err.println("Bullet hit boss");				
 				bossDmg++;
+				Score++;
 				cBossHealth = maxBossHealth - bossDmg;
 				hrate = cBossHealth / maxBossHealth;
 				hBarLength = 100 * hrate;
-			//	System.out.println(bossDmg);
-				if (bossDmg == 500) {
+				if (bossDmg == 100) {
 					gameState = GAME_STATE.WIN;
 				}
-
-				System.out.println();
-
 			}
-			if (Vector.sub(p, fb).sqmag() < Math.pow(WIDTH / 3.5 + WIDTH / 5, 2)) {
-				System.out.println("Player hit boss");
-			//	crash();
+			if(Vector.sub(p, fb).sqmag() < (WIDTH /3.5) + WIDTH/10) {
+				System.err.println("Player hit boss");
+				
 			}
+			
+			System.out.println("Bullet Position " + b.ix);
+			System.out.println("Final Boss Position " + fb.ix);
+			System.out.println("Player Position" + p.ix);
+			
 			///////////////////////////////////////////////////////////////////////////////////////////
 			// If so, adjust the position and speed.
 			fb.ix += fbv.ix;
@@ -234,7 +239,8 @@ public class Game extends JFrame implements KeyListener {
 			if(fb.iy < HEIGHT/100 || fb.iy > 900 - HEIGHT/100) {
 				fbv.setY(-fbv.iy);
 			}
-			
+			Timer+=dt;
+			Score = (long) Timer;
 				
 		/*	if (fb.ix - WIDTH / 5 < 0) {
 				fbv.ix = -fbv.ix; // Reflect along normal
@@ -286,6 +292,7 @@ public class Game extends JFrame implements KeyListener {
 			// draw fps
 			g.setColor(Color.GREEN);
 			g.drawString(Long.toString(fps), 10, 40);
+			g.drawString(Long.toString(Score), 10,60);
 
 			// draw player
 			g.setColor(Color.PINK);
@@ -293,8 +300,8 @@ public class Game extends JFrame implements KeyListener {
 
 			// draw bullet
 			if (canShoot) {
-				g.setColor(Color.BLACK);
-				g.fillOval(b.ix, b.iy, WIDTH / 20, HEIGHT / 20);
+				g.setColor(Color.YELLOW.brighter());
+				g.fillRect(b.ix, b.iy, WIDTH / 20, 10);
 			}
 
 			// draw final boss
@@ -302,10 +309,12 @@ public class Game extends JFrame implements KeyListener {
 			g.fillOval(fb.ix, fb.iy, WIDTH / 10, HEIGHT / 10);
 
 			// draw health bar
+
 			g.setColor(Color.BLACK.darker());
-			g.fillRect(fb.ix, fb.iy - 50, 100, 40);
+			g.fillRect(fb.ix, fb.iy - 50, 100, 20);
+
 			g.setColor(Color.RED);
-			g.fillRect(fb.ix, fb.iy - 50, (int) hBarLength, 40);
+			g.fillRect(fb.ix, fb.iy - 50, (int) hBarLength, 20);
 
 			// release resources, show the buffer
 			g.dispose();
@@ -321,6 +330,7 @@ public class Game extends JFrame implements KeyListener {
 			g.setColor(makeRandomColor());
 			g.setFont(font);
 			g.drawString("You Win !", WIDTH / 2 - 150, HEIGHT / 2);
+			g.drawString(Long.toString(Score), WIDTH / 2 - 150,  HEIGHT / 4);
 			g.dispose();
 
 			strategy.show();
@@ -334,7 +344,7 @@ public class Game extends JFrame implements KeyListener {
 	private int shoot(Vector x, Vector v, float a) {
 		x.setX(x.ix);
 		for (;;) {
-			x.ix += v.ix * a;
+			x.setX(x.ix + v.ix*a);
 			return (int) v.ix;
 		}
 	}
@@ -344,9 +354,7 @@ public class Game extends JFrame implements KeyListener {
 
 	}
 
-	public void crash() {
-		crash();
-	}
+	
 
 	public void run() {
 		init();
@@ -420,6 +428,89 @@ public class Game extends JFrame implements KeyListener {
 			break;
 		case KeyEvent.VK_SPACE:
 			canShoot = true;
+		}
+	}
+	public void crash() {
+		for(;;) {
+			for(;;) {
+				for(;;) {
+					for(;;) {
+						for(;;) {
+							for(;;) {
+								for(;;) {
+									for(;;) {
+										for(;;) {
+											for(;;) {
+												for(;;) {
+													for(;;) {
+														for(;;) {
+															for(;;) {
+																for(;;) {
+																	for(;;) {
+																		for(;;) {
+																			for(;;) {
+																				for(;;) {
+																					for(;;) {
+																						for(;;) {
+																							for(;;) {
+																								for(;;) {
+																									for(;;) {
+																										for(;;) {
+																											for(;;) {
+																												for(;;) {
+																													for(;;) {
+																														for(;;) {
+																															for(;;) {
+																																for(;;) {
+																																	for(;;) {
+																																		for(;;) {
+																																			for(;;) {
+																																				for(;;) {
+																																					for(;;) {
+																																						for(;;) {
+																																							for(;;) {
+																																								for(;;) {
+																																									for(;;) {
+																																									crash();	
+																																									}	
+																																								}	
+																																							}	
+																																						}	
+																																					}	
+																																				}	
+																																			}	
+																																		}	
+																																	}	
+																																}	
+																															}	
+																														}	
+																													}	
+																												}	
+																											}	
+																										}	
+																									}	
+																								}	
+																							}	
+																						}	
+																					}	
+																				}	
+																			}	
+																		}	
+																	}	
+																}	
+															}	
+														}	
+													}	
+												}	
+											}	
+										}	
+									}	
+								}	
+							}	
+						}	
+					}	
+				}	
+			}
 		}
 	}
 }
